@@ -11,6 +11,7 @@ const Layout = ({ children }) => {
     { path: '/', label: 'Home' },
     { path: '/practice', label: 'Practice Exam' },
     { path: '/simulation', label: 'Simulation Exam' },
+    { path: '/about', label: 'About' },
   ];
 
   return (
@@ -39,7 +40,7 @@ const Layout = ({ children }) => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-8">
+      <div className="flex-1">
         {children}
       </div>
     </div>
