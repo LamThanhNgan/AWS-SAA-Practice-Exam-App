@@ -2,6 +2,49 @@ import { useContext, useState, useEffect } from 'react';
 import { QuestionContext } from '../context/QuestionContext';
 import BookmarkButton from './BookmarkButton';
 import BookmarksPanel from './BookmarksPanel';
+import ResultModal from './ResultModal';
+
+const calculateDomainScores = (answers, questions) => {
+  const domainQuestions = {
+    'Identity and Access Management': [],
+    'Compute and Network Services': [],
+    'Storage Solutions': [],
+    'Database Services': [],
+    'Application Integration': []
+  };
+
+  // Group questions by domain
+  questions.forEach(q => {
+    const domain = q.domain || 'Identity and Access Management'; // Default domain if not specified
+    domainQuestions[domain].push(q);
+  });
+
+  // Calculate scores for each domain
+  const domainScores = {};
+  Object.entries(domainQuestions).forEach(([domain, questions]) => {
+    if (questions.length === 0) return;
+
+    const correctCount = questions.reduce((count, q) => {
+      return count + (answers[q.id] === q.correctAnswer ? 1 : 0);
+    }, 0);
+
+    domainScores[domain] = Math.round((correctCount / questions.length) * 100);
+  });
+
+  return domainScores;
+};
+
+const calculateTimeAnalysis = (answers, timeLeft, totalQuestions) => {
+  const totalTime = 130 * 60; // 130 minutes in seconds
+  const timeSpent = totalTime - timeLeft;
+  const answeredQuestions = Object.keys(answers).length;
+
+  return {
+    averageTimePerQuestion: answeredQuestions > 0 ? Math.round(timeSpent / answeredQuestions) : 0,
+    questionsRevisited: 0, // This would need tracking of question visits
+    unansweredQuestions: totalQuestions - answeredQuestions
+  };
+};
 
 const PracticeExam = () => {
   const { questions, loading, clearBookmarks } = useContext(QuestionContext);
@@ -11,7 +54,9 @@ const PracticeExam = () => {
   const [timeLeft, setTimeLeft] = useState(130 * 60); // 130 minutes in seconds
   const [examNumber, setExamNumber] = useState(1);
   const userName = localStorage.getItem('userName') || 'User';
-  const [scores, setScores] = useState({});
+  const [showResult, setShowResult] = useState(false);
+  const [examScore, setExamScore] = useState(0);
+  const [questionVisits, setQuestionVisits] = useState({}); // Track question visits
 
   const totalExams = Math.ceil(questions.length / totalQuestions);
   const startIndex = (examNumber - 1) * totalQuestions;
@@ -36,6 +81,14 @@ const PracticeExam = () => {
     });
   };
 
+  // Track question visits
+  useEffect(() => {
+    setQuestionVisits(prev => ({
+      ...prev,
+      [currentQuestion.id]: (prev[currentQuestion.id] || 0) + 1
+    }));
+  }, [currentQuestionIndex]);
+
   const handlePrevious = () => {
     if (currentQuestionIndex > 0) setCurrentQuestionIndex(currentQuestionIndex - 1);
   };
@@ -44,15 +97,44 @@ const PracticeExam = () => {
     if (currentQuestionIndex < totalQuestions - 1) setCurrentQuestionIndex(currentQuestionIndex + 1);
   };
 
-  const handleSubmit = () => {
+  const calculateScore = () => {
     const correctCount = Object.entries(selectedAnswers).reduce((count, [id, answer]) => {
       const question = examQuestions.find(q => q.id === parseInt(id));
       return count + (question.correctAnswer === answer ? 1 : 0);
     }, 0);
-    setScores(prev => ({
-      ...prev,
-      [`${userName} - Exam ${examNumber}`]: Math.round((correctCount / totalQuestions) * 100),
-    }));
+    return Math.round((correctCount / totalQuestions) * 100);
+  };
+
+  const calculateScoreDetails = () => {
+    const domainScores = calculateDomainScores(selectedAnswers, examQuestions);
+    const timeAnalysis = calculateTimeAnalysis(selectedAnswers, timeLeft, totalQuestions);
+    
+    // Update time analysis with revisited questions
+    timeAnalysis.questionsRevisited = Object.values(questionVisits).filter(visits => visits > 1).length;
+
+    return {
+      domainScores,
+      timeAnalysis
+    };
+  };
+
+  const handleSubmit = () => {
+    const score = calculateScore();
+    const scoreDetails = calculateScoreDetails();
+    setExamScore(score);
+    setShowResult(true);
+    clearBookmarks();
+  };
+
+  const handleCloseResult = () => {
+    setShowResult(false);
+  };
+
+  const handleStartNewExam = () => {
+    setCurrentQuestionIndex(0);
+    setSelectedAnswers({});
+    setTimeLeft(130 * 60);
+    setShowResult(false);
     clearBookmarks();
   };
 
@@ -70,10 +152,7 @@ const PracticeExam = () => {
             value={examNumber}
             onChange={(e) => {
               setExamNumber(parseInt(e.target.value));
-              setCurrentQuestionIndex(0);
-              setSelectedAnswers({});
-              setTimeLeft(130 * 60);
-              clearBookmarks();
+              handleStartNewExam();
             }}
             className="w-full p-2 border border-gray-300 rounded-md bg-white text-gray-700"
           >
@@ -195,6 +274,17 @@ const PracticeExam = () => {
         currentQuestionIndex={currentQuestionIndex}
         setCurrentQuestionIndex={setCurrentQuestionIndex}
       />
+
+      {/* Result Modal */}
+      {showResult && (
+        <ResultModal
+          score={examScore}
+          onClose={handleCloseResult}
+          examNumber={examNumber}
+          userName={userName}
+          scoreDetails={calculateScoreDetails()}
+        />
+      )}
     </div>
   );
 };
