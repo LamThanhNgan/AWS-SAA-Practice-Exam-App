@@ -11,7 +11,7 @@ const About = () => {
     if (savedDate) {
       setExamDate(new Date(savedDate));
     } else {
-      const defaultDate = new Date('2025-06-09');
+      const defaultDate = new Date('2025-01-01');
       setExamDate(defaultDate);
       localStorage.setItem('examDate', defaultDate.toISOString());
     }
@@ -233,10 +233,10 @@ const About = () => {
           {/* Certificate Image */}
           <div className="group bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300">
             <div className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+              {/* <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
                 <span className="text-2xl mr-3">🏅</span>
                 AWS Certificate Preview
-              </h2>
+              </h2> */}
             </div>
             <div className="px-6 pb-6">
               <img 
