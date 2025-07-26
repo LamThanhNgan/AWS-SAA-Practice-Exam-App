@@ -346,7 +346,7 @@ const About = () => {
 
         {/* Footer */}
         <div className="text-center text-gray-500 text-sm lg:text-base mt-16">
-          <p>© 2024 AWS SAA Practice Platform by NganLT. Your journey to cloud architecture mastery starts here.</p>
+          <p>© 2025 AWS SAA Practice Platform by NganLT. Your journey to cloud architecture mastery starts here.</p>
         </div>
       </div>
     </div>

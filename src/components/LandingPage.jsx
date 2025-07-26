@@ -229,7 +229,7 @@ const LandingPage = () => {
 
         {/* Footer */}
         <div className="text-center text-gray-500 text-sm lg:text-base">
-          <p>© 2024 AWS SAA Practice Platform by NganLT. Built for AWS certification success.</p>
+          <p>© 2025 AWS SAA Practice Platform by NganLT. Built for AWS certification success.</p>
         </div>
       </div>
     </div>
