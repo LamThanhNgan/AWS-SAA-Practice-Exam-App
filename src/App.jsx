@@ -3,18 +3,19 @@ import { QuestionProvider } from './context/QuestionContext';
 import LandingPage from './components/LandingPage';
 import PracticeExam from './components/PracticeExam';
 import SimulationExam from './components/SimulationExam';
+import Layout from './components/Layout';
 
 function App() {
   return (
     <QuestionProvider>
       <Router>
-        <div className="min-h-screen bg-gray-100">
+        <Layout>
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/practice" element={<PracticeExam />} />
             <Route path="/simulation" element={<SimulationExam />} />
           </Routes>
-        </div>
+        </Layout>
       </Router>
     </QuestionProvider>
   );
