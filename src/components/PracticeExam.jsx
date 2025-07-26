@@ -3,6 +3,7 @@ import { QuestionContext } from '../context/QuestionContext';
 import BookmarkButton from './BookmarkButton';
 import BookmarksPanel from './BookmarksPanel';
 import ResultModal from './ResultModal';
+import ConfirmDialog from './ConfirmDialog';
 
 const calculateDomainScores = (answers, questions) => {
   const domainQuestions = {
@@ -57,6 +58,7 @@ const PracticeExam = () => {
   const [showResult, setShowResult] = useState(false);
   const [examScore, setExamScore] = useState(0);
   const [questionVisits, setQuestionVisits] = useState({}); // Track question visits
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const totalExams = Math.ceil(questions.length / totalQuestions);
   const startIndex = (examNumber - 1) * totalQuestions;
@@ -97,11 +99,19 @@ const PracticeExam = () => {
     if (currentQuestionIndex < totalQuestions - 1) setCurrentQuestionIndex(currentQuestionIndex + 1);
   };
 
+  const getUnansweredCount = () => {
+    return totalQuestions - Object.keys(selectedAnswers).length;
+  };
+
   const calculateScore = () => {
-    const correctCount = Object.entries(selectedAnswers).reduce((count, [id, answer]) => {
-      const question = examQuestions.find(q => q.id === parseInt(id));
-      return count + (question.correctAnswer === answer ? 1 : 0);
-    }, 0);
+    let correctCount = 0;
+    examQuestions.forEach(question => {
+      const userAnswer = selectedAnswers[question.id];
+      if (userAnswer === question.correctAnswer) {
+        correctCount++;
+      }
+      // No need for else case as unanswered questions are automatically wrong
+    });
     return Math.round((correctCount / totalQuestions) * 100);
   };
 
@@ -118,12 +128,25 @@ const PracticeExam = () => {
     };
   };
 
-  const handleSubmit = () => {
+  const handleSubmitClick = () => {
+    const unansweredCount = getUnansweredCount();
+    const message = unansweredCount === 0
+      ? 'Are you sure you want to submit your exam?'
+      : 'You still have unanswered questions. Would you like to submit anyway?';
+    
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmSubmit = () => {
+    setShowConfirmDialog(false);
     const score = calculateScore();
-    const scoreDetails = calculateScoreDetails();
     setExamScore(score);
     setShowResult(true);
     clearBookmarks();
+  };
+
+  const handleCloseConfirm = () => {
+    setShowConfirmDialog(false);
   };
 
   const handleCloseResult = () => {
@@ -246,7 +269,7 @@ const PracticeExam = () => {
               Previous
             </button>
             <div className="text-sm text-gray-600">
-              Progress: {progress.toFixed(0)}%
+              Progress: {progress.toFixed(0)}% | Answered: {Object.keys(selectedAnswers).length}/{totalQuestions}
             </div>
             <div className="flex space-x-4">
               <button
@@ -257,9 +280,9 @@ const PracticeExam = () => {
                 Next
               </button>
               <button
-                onClick={handleSubmit}
+                onClick={handleSubmitClick}
                 className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                disabled={Object.keys(selectedAnswers).length < totalQuestions && timeLeft > 0}
+                disabled={timeLeft === 0}
               >
                 Submit
               </button>
@@ -285,6 +308,19 @@ const PracticeExam = () => {
           scoreDetails={calculateScoreDetails()}
         />
       )}
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        onClose={handleCloseConfirm}
+        onConfirm={handleConfirmSubmit}
+        message={
+          getUnansweredCount() === 0
+            ? 'Are you sure you want to submit your exam?'
+            : 'You still have unanswered questions. Would you like to submit anyway?'
+        }
+        unansweredCount={getUnansweredCount()}
+      />
     </div>
   );
 };
