@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 const About = () => {
   const [daysLeft, setDaysLeft] = useState(0);
-  const examDate = new Date('2025-06-09');
+  const examDate = new Date('2025-09-06');
 
   useEffect(() => {
     const calculateDaysLeft = () => {
