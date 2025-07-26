@@ -2,11 +2,11 @@ import { useContext } from 'react';
 import { QuestionContext } from '../context/QuestionContext';
 
 const BookmarkButton = ({ questionId }) => {
-  const { isBookmarked, addBookmark, removeBookmark } = useContext(QuestionContext);
-  const bookmarked = isBookmarked(questionId);
+  const { bookmarks, addBookmark, removeBookmark } = useContext(QuestionContext);
+  const isBookmarked = bookmarks.includes(questionId);
 
   const handleToggleBookmark = () => {
-    if (bookmarked) {
+    if (isBookmarked) {
       removeBookmark(questionId);
     } else {
       addBookmark(questionId);
@@ -16,19 +16,19 @@ const BookmarkButton = ({ questionId }) => {
   return (
     <button
       onClick={handleToggleBookmark}
-      className={`p-2 rounded-full transition-colors ${
-        bookmarked
-          ? 'bg-yellow-100 text-yellow-600 hover:bg-yellow-200'
-          : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+      className={`p-2 rounded-lg transition-colors ${
+        isBookmarked
+          ? 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100'
+          : 'text-gray-400 hover:text-indigo-600 hover:bg-indigo-50'
       }`}
-      title={bookmarked ? 'Remove bookmark' : 'Add bookmark'}
+      title={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
     >
       <svg
-        className="w-5 h-5"
-        fill={bookmarked ? 'currentColor' : 'none'}
-        stroke="currentColor"
-        viewBox="0 0 24 24"
         xmlns="http://www.w3.org/2000/svg"
+        className="h-6 w-6"
+        fill={isBookmarked ? 'currentColor' : 'none'}
+        viewBox="0 0 24 24"
+        stroke="currentColor"
       >
         <path
           strokeLinecap="round"
