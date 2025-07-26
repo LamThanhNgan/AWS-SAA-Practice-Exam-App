@@ -9,8 +9,6 @@ const Layout = ({ children }) => {
 
   const navItems = [
     { path: '/', label: 'Home' },
-    { path: '/practice', label: 'Practice Exam' },
-    { path: '/simulation', label: 'Simulation Exam' },
     { path: '/about', label: 'About' },
   ];
 
